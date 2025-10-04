@@ -31,7 +31,7 @@ async function deploy() {
         process.cwd()
       );
     }
-
+ 
     await runCommand(`git pull https://${GITHUB_TOKEN}@github.com/ms-vishwanath/express-template-server.git ${BRANCH}`, PROJECT_DIR);
 
     await runCommand('npm ci', PROJECT_DIR);
