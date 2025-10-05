@@ -6,6 +6,8 @@ const BRANCH = process.env.BRANCH || 'main';
 const PM2_NAME = process.env.PM2_NAME || 'express_template_server';
 const DEPLOY_VARIANT = process.env.DEPLOY_VARIANT || 'vps';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_USERNAME = process.env.GITHUB_USERNAME;
+const GITHUB_REPO_NAME = process.env.GITHUB_REPO_NAME || 'express-template-server';
 
 // Run shell command
 function runCommand(cmd, cwd) {
@@ -23,16 +25,27 @@ async function deploy() {
   try {
     console.log('Starting deployment...');
     
+    // Validate required environment variables
+    if (!GITHUB_USERNAME) {
+      throw new Error('GITHUB_USERNAME environment variable is required');
+    }
+    if (!GITHUB_TOKEN) {
+      throw new Error('GITHUB_TOKEN environment variable is required');
+    }
+    if (!PROJECT_DIR) {
+      throw new Error('PROJECT_DIR environment variable is required');
+    }
+    
     const fs = require('fs');
     if (!fs.existsSync(PROJECT_DIR)) {
       console.log('Project not found. Cloning...');
       await runCommand(
-        `git clone https://${GITHUB_TOKEN}@github.com/ms-vishwanath/express-template-server.git ${PROJECT_DIR}`,
+        `git clone https://${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}.git ${PROJECT_DIR}`,
         process.cwd()
       );
     }
  
-    await runCommand(`git pull https://${GITHUB_TOKEN}@github.com/ms-vishwanath/express-template-server.git ${BRANCH}`, PROJECT_DIR);
+    await runCommand(`git pull https://${GITHUB_TOKEN}@github.com/${GITHUB_USERNAME}/${GITHUB_REPO_NAME}.git ${BRANCH}`, PROJECT_DIR);
 
     await runCommand('npm ci', PROJECT_DIR);
     await runCommand('npm run build', PROJECT_DIR);
